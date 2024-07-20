@@ -2,6 +2,7 @@ import speech_recognition as sr
 import pyttsx3
 from planner import create_event, see_future_events
 from nlp import parse_command, extract_details
+from weather import get_weather
 
 def main():
     speak("Hello, how can I help you today?")
@@ -27,6 +28,17 @@ def perform_command (command):
             elif "events" in action_details:
                 events = see_future_events()
                 speak(events)
+
+    elif parsedcommand == "weather":
+        speak("What is your location?")
+        location = listen()
+        if location:
+            location_details = extract_details(location)
+            if location_details:
+                weather = get_weather(location_details)
+                speak(weather)
+            else:
+                speak("I'm sorry, I didn't understand that.")
 
     elif parsedcommand == "exit":
         speak("Goodbye! Have a nice day.")
