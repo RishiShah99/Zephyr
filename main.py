@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import pyttsx3
-    
+from planner import create_event, see_future_events
+
 def main():
     speak("Hello, how can I help you today?")
     while True:
@@ -12,6 +13,18 @@ def main():
 def perform_command (command): 
     if "calender" in command:
         speak("What would you like to do with your calendar?")
+        action = listen()
+        if action:
+            if "create" in action:
+                speak("What is the name of the event?")
+                name = listen()
+                if name:
+                    create_event(name)
+                    speak(f"Event {name} has been created.")
+            elif "events" in action:
+                events = see_future_events()
+                speak(events) 
+
     elif "goodbye" in command:
         speak("Goodbye! Have a nice day.")
         exit()
