@@ -6,8 +6,17 @@ def main():
     while True:
         command = listen()
         print(command)
-        # if command:
-            # Perform Command
+        if command:
+            perform_command(command)
+
+def perform_command (command): 
+    if "calender" in command:
+        speak("What would you like to do with your calendar?")
+    elif "goodbye" in command:
+        speak("Goodbye! Have a nice day.")
+        exit()
+    else:
+        speak("Sorry, I don't understand that command.")
 
 def listen():
     r = sr.Recognizer()
