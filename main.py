@@ -3,6 +3,7 @@ import pyttsx3
 from planner import create_event, see_future_events
 from nlp import parse_command, extract_details
 from weather import get_weather
+from news import get_top_news, get_everything_news
 
 def main():
     speak("Hello, how can I help you today?")
@@ -37,6 +38,26 @@ def perform_command (command):
             if location_details:
                 weather = get_weather(location_details)
                 speak(weather)
+            else:
+                speak("I'm sorry, I didn't understand that.")
+
+
+    elif parsedcommand == "news":
+        speak("What topic are you interested in?")
+        topic = listen()
+        if topic:
+            topic_details = extract_details(topic)
+            print(topic_details)
+            speak ("What type of news would you like to hear? Top news or everything?")
+            news_type = listen()
+            if news_type == "top news":
+                print("Getting top news")
+                news = get_top_news(topic_details)
+                speak(news)
+            elif news_type == "everything":
+                print("Getting everything news")
+                news = get_everything_news(topic_details)
+                speak(news)
             else:
                 speak("I'm sorry, I didn't understand that.")
 
