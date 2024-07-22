@@ -13,10 +13,11 @@ def parse_command(command):
         return 'calendar'
     elif any(token.lemma_ == 'news' for token in doc):
         return 'news'
+    elif any(token.lemma_ == 'spotify' for token in doc):
+        return 'spotify'
     else:
         return 'other'
 
 def extract_details(text):
     response = chat_session.send_message(text)
     return response.text
-

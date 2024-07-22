@@ -1,68 +1,80 @@
-import datetime as dt
-import os.path
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from api_keys import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI
 
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+scope = "user-read-playback-state,user-modify-playback-state,user-read-currently-playing"
 
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                               client_secret=SPOTIFY_CLIENT_SECRET,
+                                               redirect_uri=SPOTIFY_REDIRECT_URI,
+                                               scope=scope))
 
-def test():
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json')
+def list_devices():
+    devices = sp.devices()
+    return devices
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+def play_song(song_name):
+    devices = sp.devices()
+    if not devices['devices']:
+        return "No active devices found. Please start Spotify on a device."
+
+    # Print available devices and their IDs
+    for idx, device in enumerate(devices['devices']):
+        print(f"{idx + 1}: {device['name']} - {device['id']}")
+
+    # Use the first active device (or modify to choose a specific one)
+    device_id = devices['devices'][0]['id']
+
+    results = sp.search(q=song_name, limit=1, type='track')
+    if results['tracks']['items']:
+        track_uri = results['tracks']['items'][0]['uri']
+        sp.start_playback(device_id=device_id, uris=[track_uri])
+        return f"Playing {song_name} on {devices['devices'][0]['name']}"
+    else:
+        return "Song not found."
+
+def pause_song():
+    sp.pause_playback()
+    return "Playback paused."
+
+def skip_song():
+    sp.next_track()
+    return "Skipped to the next song."
+
+def get_current_song():
+    current = sp.current_playback()
+    if current and current['is_playing']:
+        song = current['item']['name']
+        artists = ', '.join([artist['name'] for artist in current['item']['artists']])
+        return f"Currently playing {song} by {artists}."
+    else:
+        return "No song is currently playing."
+
+def main():
+    while True:
+        print("Enter command (play, pause, skip, current, devices, or exit):")
+        command = input().lower()
+        if command == "play":
+            print("Enter the song name:")
+            song_name = input()
+            response = play_song(song_name)
+            print(response)
+        elif command == "pause":
+            response = pause_song()
+            print(response)
+        elif command == "skip":
+            response = skip_song()
+            print(response)
+        elif command == "current":
+            response = get_current_song()
+            print(response)
+        elif command == "devices":
+            devices = list_devices()
+            print(devices)
+        elif command == "exit":
+            break
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            print("Invalid command. Please try again.")
 
-    try:
-        service = build('calendar', 'v3', credentials=creds)
-        # Code to create new event 
-        event = {
-            'summary': 'My Python Event',
-            'location': 'Test Location',
-            'description': 'Test Description',
-            'colorId': '6',
-            'start': {
-                'dateTime': '2024-07-05T09:00:00-07:00',
-                'timeZone': 'America/Los_Angeles',
-            },
-            'end': {
-                'dateTime': '2024-07-05T10:00:00-07:00',
-                'timeZone': 'America/Los_Angeles',
-            }, 
-            'recurrence': [
-                'RRULE:FREQ=DAILY;COUNT=2'
-            ],
-            'attendees': [
-                {'email': 'rishishah994@gmail.com'},
-            ]
-        }
-        event = service.events().insert(calendarId='primary', body=event).execute()
-        print(f'Event created: {event.get("htmlLink")}')
-
-       
-        # now = dt.datetime.now().isoformat() + 'Z'
-
-        # # Code to list all events in the next 10 days
-        # event_result = service.events().list(calendarId='primary', timeMin=now, maxResults=10, singleEvents=True, orderBy='startTime').execute()
-        # events = event_result.get('items', [])
-
-        # if not events:
-        #     print('No upcoming events found.')
-        # for event in events:
-        #     start = event['start'].get('dateTime', event['start'].get('date'))
-        #     print(f"Event: {event['summary']} starts at {start}")
-    except HttpError as error:
-        print(f'An error occurred: {error}')
-
-
-test()
+if __name__ == "__main__":
+    main()

@@ -4,7 +4,8 @@ from weather import get_weather
 from planner import create_event, see_future_events
 from news import get_top_news, get_everything_news
 from nlp import parse_command, extract_details
-    
+# from spotify import play_song, pause_song, skip_song, get_current_song
+
 def main():
     speak("Hello, how can I help you today?")
     while True:
@@ -73,6 +74,28 @@ def perform_command(command):
                 speak(news)
             else:
                 speak("I'm sorry, I didn't understand that.")
+
+    # elif parsedcommand == "spotify":
+    #     speak("What would you like to do with Spotify? You can say play, pause, skip, or current song.")
+    #     action = listen()
+    #     if action:
+    #         if "play" in action:
+    #             speak("What song would you like to play?")
+    #             song = listen()
+    #             if song:
+    #                 response = play_song(song)
+    #                 speak(response)
+    #         elif "pause" in action:
+    #             response = pause_song()
+    #             speak(response)
+    #         elif "skip" in action:
+    #             response = skip_song()
+    #             speak(response)
+    #         elif "current" in action:
+    #             response = get_current_song()
+    #             speak(response)
+    #         else:
+    #             speak("I'm sorry, I didn't understand that.")
 
     else:
         speak("I'm sorry, I didn't understand that.")

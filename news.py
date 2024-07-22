@@ -3,7 +3,6 @@ from api_keys import NEWS_API_KEY
 
 newsapi = NewsApiClient(api_key=NEWS_API_KEY)
 
-
 def get_top_news(topic):
     top_headlines = newsapi.get_top_headlines(q=topic)
     if 'articles' in top_headlines:
