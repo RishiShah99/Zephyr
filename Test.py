@@ -23,7 +23,7 @@ def play_song(song_name):
         print(f"{idx + 1}: {device['name']} - {device['id']}")
 
     # Use the first active device (or modify to choose a specific one)
-    device_id = devices['devices'][0]['id']
+    device_id = devices['devices'][0]['id'] 
 
     results = sp.search(q=song_name, limit=1, type='track')
     if results['tracks']['items']:

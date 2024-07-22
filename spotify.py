@@ -10,11 +10,22 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
                                                scope=scope))
 
 def play_song(song_name):
+    devices = sp.devices()
+    if not devices['devices']:
+        return "No active devices found. Please start Spotify on a device."
+
+    # Print available devices and their IDs
+    for idx, device in enumerate(devices['devices']):
+        print(f"{idx + 1}: {device['name']} - {device['id']}")
+
+    # Use the first active device (or modify to choose a specific one)
+    device_id = devices['devices'][0]['id'] 
+
     results = sp.search(q=song_name, limit=1, type='track')
     if results['tracks']['items']:
         track_uri = results['tracks']['items'][0]['uri']
-        sp.start_playback(uris=[track_uri])
-        return f"Playing {song_name}"
+        sp.start_playback(device_id=device_id, uris=[track_uri])
+        return f"Playing {song_name} on {devices['devices'][0]['name']}"
     else:
         return "Song not found."
 
