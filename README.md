@@ -10,15 +10,6 @@ Zephyr is a custom-built smart home voice assistant designed to respond exclusiv
 - **Calendar Management**: Manage your schedule and receive reminders.
 - **News and Information**: Stay updated with the latest news and stock information.
 - **Music Playback**: Play your favorite music on Spotify.
-- **Voice-Controlled Internet Search**: Search the web using voice commands.
-
-## Components
-
-- **Design**: The netting around Zephyr has an oval-ish shape and is 3D printed.
-- **Base**: Zephyr rests on top of a wooden box for stability.
-- **Speaker**: Connects to a large speaker, either built-in or via Bluetooth.
-- **Microphone**: Equipped with a highly sensitive microphone, with optional Bluetooth connectivity to your phone.
-- **LEDs**: Internal LEDs light up when Zephyr is active, using black PLA filament for the casing.
 
 ## Getting Started
 
@@ -46,7 +37,6 @@ Zephyr is a custom-built smart home voice assistant designed to respond exclusiv
     ```bash
     sudo apt-get update
     sudo apt-get install python3-pip
-    pip3 install -r requirements.txt
     ```
 
 4. **Run the assistant**:
