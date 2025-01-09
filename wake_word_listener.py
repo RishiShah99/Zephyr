@@ -2,9 +2,7 @@ import pvporcupine
 import pyaudio
 import struct
 from ui import open_popup
-
-# Replace with your actual Picovoice access key
-ACCESS_KEY = "JYwZceXvxP0ikCP9vGjn33uO1EmnsRJEAY+HTtIKwK/t+cCSybbUjw=="
+from api_keys import ACCESS_KEY
 
 # Path to your Porcupine keyword file
 KEYWORD_PATH = "Yo_Zephyr.ppn"
