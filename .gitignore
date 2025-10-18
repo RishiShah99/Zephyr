@@ -14,6 +14,7 @@ env/
 # Documentation (keep local only, not on GitHub)
 *.md
 !README.md
+!ZEPHYR_CAPABILITIES.md
 
 # Archive folder (keep local only)
 archive/

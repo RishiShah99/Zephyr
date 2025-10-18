@@ -64,10 +64,12 @@ def main():
 
 def _toggle(overlay):
     try:
-        # Tk doesn't expose visibility directly; try toggling via state
-        overlay.show()
-    except Exception:
-        pass
+        if overlay.is_visible:
+            overlay.hide()
+        else:
+            overlay.show()
+    except Exception as e:
+        print(f"Toggle error: {e}")
 
 
 def _ask_via_overlay(prompt: str) -> str:

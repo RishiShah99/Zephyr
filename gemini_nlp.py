@@ -42,8 +42,8 @@ def understand_command(user_input: str) -> Dict[str, Any]:
         return {"intent": "unknown", "entities": {}, "natural_response": False}
     
     try:
-        # Use gemini-1.5-flash (newer, faster model)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Use gemini-2.0-flash-exp (latest available model)
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
         # System prompt to teach Gemini about Zephyr's capabilities
         system_prompt = """You are a command interpreter for Zephyr, an AI assistant. 
@@ -85,7 +85,7 @@ Response: {"intent": "chat", "entities": {}, "natural_response": true}
 User: "tell me a joke"
 Response: {"intent": "chat", "entities": {}, "natural_response": true}
 
-Respond ONLY with valid JSON in the exact format shown above. No markdown, no extra text."""
+IMPORTANT: When responding as chat, be conversational and helpful. Do NOT include references, citations, or source links. Just provide clean, direct information."""
 
         # Get Gemini's understanding
         prompt = f"{system_prompt}\n\nUser: \"{user_input}\"\nResponse:"
@@ -121,14 +121,15 @@ def generate_natural_response(user_input: str, context: str = "") -> str:
         return "I'm here to help! Try commands like 'play music', 'weather in [city]', 'create project [name]', or 'news about [topic]'."
     
     try:
-        # Use gemini-1.5-flash (newer, faster model)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Use gemini-2.0-flash-exp (latest available model)
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
         personality_prompt = """You are Zephyr, a helpful AI assistant inspired by Jarvis from Iron Man.
 You are witty, intelligent, slightly sarcastic but always helpful. Keep responses concise (2-3 sentences max).
 You can help with: Spotify music control, weather, calendar, news, project management, memories, and dev workspace launching.
 
-When answering questions, be conversational and natural. Don't just list capabilities unless asked."""
+When answering questions, be conversational and natural. Don't just list capabilities unless asked.
+NEVER include references, citations, source links, or footnotes in your responses. Just provide clean, direct information."""
 
         prompt = f"{personality_prompt}\n\n"
         if context:

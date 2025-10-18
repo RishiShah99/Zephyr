@@ -21,13 +21,14 @@ class Overlay:
         self.root.attributes("-topmost", True)
         self.root.overrideredirect(True)
         
-        # Glassmorphism background (dark with slight transparency)
-        self.root.configure(bg="#0A0A0A")
+        # Holographic transparent background
+        self.root.configure(bg="#000814")
+        self.root.attributes("-alpha", 0.95)  # Slight transparency for hologram effect
         
         # Position bottom-right - BIGGER for scrolling
         self.root.update_idletasks()
-        self.width = 600
-        self.height = 400
+        self.width = 650
+        self.height = 480
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
         self.target_x = screen_w - self.width - 20
@@ -38,68 +39,74 @@ class Overlay:
         self.start_y = self.target_y
         self.root.geometry(f"{self.width}x{self.height}+{self.start_x}+{self.start_y}")
         
-        # Modern container with GLOWING border effect
-        self.frame = tk.Frame(self.root, bg="#00D9FF", highlightthickness=0)
-        self.frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+        # Outer glow container (holographic border)
+        self.frame = tk.Frame(self.root, bg="#00F0FF", highlightthickness=0)
+        self.frame.pack(fill=tk.BOTH, expand=True, padx=3, pady=3)
         
-        # Inner frame with gradient-like effect
-        self.inner_frame = tk.Frame(self.frame, bg="#1A1A1A")
+        # Inner frame with holographic dark background
+        self.inner_frame = tk.Frame(self.frame, bg="#001D3D")
         self.inner_frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
         
-        # Header with BIG sparkle icon
-        header_frame = tk.Frame(self.inner_frame, bg="#1A1A1A")
-        header_frame.pack(fill=tk.X, pady=(10, 12))
+        # HOLOGRAPHIC HEAD at top
+        head_frame = tk.Frame(self.inner_frame, bg="#001D3D")
+        head_frame.pack(fill=tk.X, pady=(15, 5))
         
-        self.sparkle_label = tk.Label(
-            header_frame,
-            text="✨",
-            font=("Segoe UI Emoji", 24),
-            bg="#1A1A1A",
-            fg="#00D9FF"
+        # Zephyr hologram avatar
+        self.avatar = tk.Label(
+            head_frame,
+            text="◉",  # Simple circle for holographic head
+            font=("Segoe UI", 72, "bold"),
+            bg="#001D3D",
+            fg="#00F0FF"
         )
-        self.sparkle_label.pack(side=tk.LEFT, padx=(10, 12))
+        self.avatar.pack()
         
+        # Assistant name
         self.label = tk.Label(
-            header_frame,
-            text="How can I help?",
-            fg="#FFFFFF",
-            bg="#1A1A1A",
-            font=("Segoe UI", 13, "bold"),
-            anchor="w"
+            head_frame,
+            text="ZEPHYR",
+            fg="#00F0FF",
+            bg="#001D3D",
+            font=("Segoe UI", 16, "bold"),
+            anchor="center"
         )
-        self.label.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.label.pack(pady=(5, 0))
         
-        # Modern entry with GLOWING border
-        entry_container = tk.Frame(self.inner_frame, bg="#00D9FF", highlightthickness=0)
-        entry_container.pack(fill=tk.X, padx=15, pady=(0, 12))
+        # Holographic divider
+        divider = tk.Frame(self.inner_frame, bg="#00F0FF", height=1)
+        divider.pack(fill=tk.X, padx=30, pady=10)
+        
+        # Modern entry with holographic glow
+        entry_container = tk.Frame(self.inner_frame, bg="#00F0FF", highlightthickness=0)
+        entry_container.pack(fill=tk.X, padx=25, pady=(0, 15))
         
         self.entry = tk.Entry(
             entry_container,
-            bg="#2A2A2A",
+            bg="#002855",
             fg="#FFFFFF",
-            insertbackground="#00D9FF",
+            insertbackground="#00F0FF",
             font=("Segoe UI", 12),
             relief=tk.FLAT,
             borderwidth=0
         )
-        self.entry.pack(fill=tk.X, padx=2, pady=2)
+        self.entry.pack(fill=tk.X, padx=2, pady=2, ipady=6)
         self.entry.focus_set()
         self.entry.bind("<Return>", self._submit)
         
-        # Response area with SCROLLING - using Text widget instead of Label!
-        response_container = tk.Frame(self.inner_frame, bg="#1A1A1A")
-        response_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 15))
+        # Response area with SCROLLING - holographic theme
+        response_container = tk.Frame(self.inner_frame, bg="#001D3D")
+        response_container.pack(fill=tk.BOTH, expand=True, padx=25, pady=(0, 20))
         
         self.response = scrolledtext.ScrolledText(
             response_container,
-            bg="#0D0D0D",
-            fg="#B0B0B0",
-            insertbackground="#00D9FF",
-            font=("Segoe UI", 10),
+            bg="#000814",
+            fg="#94D2FF",
+            insertbackground="#00F0FF",
+            font=("Segoe UI", 11),
             relief=tk.FLAT,
             borderwidth=0,
-            padx=15,
-            pady=15,
+            padx=18,
+            pady=18,
             wrap=tk.WORD,
             height=10,
             state=tk.DISABLED  # Read-only
@@ -109,9 +116,9 @@ class Overlay:
         # Typing indicator (hidden by default)
         self.typing_indicator = tk.Label(
             response_container,
-            text="✨ Thinking...",
-            fg="#00D9FF",
-            bg="#1A1A1A",
+            text="◉ Processing...",
+            fg="#00F0FF",
+            bg="#001D3D",
             font=("Segoe UI", 10, "italic")
         )
         
@@ -174,21 +181,23 @@ class Overlay:
         # Hide typing indicator
         self.typing_indicator.pack_forget()
         
-        # Re-enable entry
+        # Re-enable entry (but keep processing=True until typing is done)
         self.entry.config(state=tk.NORMAL)
         self.entry.focus_set()
-        self.processing = False
         
         if reply:
-            # Type out the response with animation
+            # Type out the response with animation (processing flag cleared in _type_text when done)
             self._type_text(reply)
             if self.enable_voice:
                 self.say(reply)
+        else:
+            # No reply, clear processing flag now
+            self.processing = False
     
     def _type_text(self, text, index=0):
         """Animated typing effect for scrollable text widget"""
-        # Check if we should still be typing (not cancelled)
-        if not self.is_visible or not self.processing:
+        # Check if we should still be typing (not cancelled by Escape)
+        if not self.is_visible:
             return
             
         if index < len(text):
@@ -201,13 +210,13 @@ class Overlay:
         else:
             self.response.config(state=tk.DISABLED)
             self.typing_job = None
-            self.processing = False
+            self.processing = False  # Done typing, clear flag
     
     def _animate_thinking(self):
-        """Animate typing indicator with sparkles"""
+        """Animate holographic processing indicator"""
         if self.entry['state'] == tk.DISABLED and self.is_visible and self.processing:
             current = self.typing_indicator.cget("text")
-            indicators = ["✨ Thinking...", "⭐ Thinking...", "💫 Thinking...", "✨ Thinking..."]
+            indicators = ["◉ Processing...", "◎ Processing...", "○ Processing...", "◎ Processing..."]
             try:
                 idx = indicators.index(current)
                 next_idx = (idx + 1) % len(indicators)
@@ -239,15 +248,20 @@ class Overlay:
         self._slide_in()
     
     def _glow_pulse(self, step=0):
-        """Continuous pulsing glow effect on border"""
+        """Continuous holographic pulsing glow effect"""
         if not self.glow_animation_running:
             return
         
-        # Cycle through cyan variations
-        colors = ["#00D9FF", "#00B8E6", "#0099CC", "#00B8E6", "#00D9FF", "#00F0FF"]
+        # Cycle through holographic cyan/blue variations
+        colors = ["#00F0FF", "#00D4FF", "#00B8FF", "#00D4FF", "#00F0FF", "#0AF8FF"]
         color = colors[step % len(colors)]
         self.frame.configure(bg=color)
-        self.root.after(150, lambda: self._glow_pulse(step + 1))
+        
+        # Pulse the avatar hologram too
+        avatar_colors = ["#00F0FF", "#00D4FF", "#00C8FF", "#00D4FF", "#00F0FF", "#12FFFF"]
+        self.avatar.configure(fg=avatar_colors[step % len(avatar_colors)])
+        
+        self.root.after(140, lambda: self._glow_pulse(step + 1))
     
     def _slide_in(self, step=0):
         """Smooth slide-in animation from right"""
@@ -261,8 +275,8 @@ class Overlay:
             current_x = int(self.start_x + (self.target_x - self.start_x) * eased)
             self.root.geometry(f"{self.width}x{self.height}+{current_x}+{self.target_y}")
             
-            # Fade in
-            alpha = eased * 0.97
+            # Fade in to 95% for holographic transparency
+            alpha = eased * 0.95
             self.root.attributes("-alpha", alpha)
             
             # Continue animation
@@ -272,13 +286,14 @@ class Overlay:
             self.entry.focus_set()
     
     def _sparkle_animation(self, count=0):
-        """Enhanced sparkle icon animation with rotation"""
-        if count < 12:
-            sparkles = ["✨", "⭐", "💫", "✨", "🌟", "✨", "💫", "⭐", "✨", "🌠", "✨", "⭐"]
-            self.sparkle_label.config(text=sparkles[count], fg=["#00D9FF", "#00F0FF", "#FFD700"][count % 3])
-            self.root.after(80, lambda: self._sparkle_animation(count + 1))
+        """Holographic avatar pulse animation"""
+        if count < 10:
+            # Pulse the holographic head
+            sizes = [72, 74, 76, 78, 76, 74, 72, 70, 68, 70]
+            self.avatar.config(font=("Segoe UI", sizes[count], "bold"))
+            self.root.after(90, lambda: self._sparkle_animation(count + 1))
         else:
-            self.sparkle_label.config(text="✨", fg="#00D9FF")
+            self.avatar.config(font=("Segoe UI", 72, "bold"))
 
     def hide(self):
         """Slide out to right with smooth animation and reset state"""
