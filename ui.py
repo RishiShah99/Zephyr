@@ -8,6 +8,14 @@ class Overlay:
     def __init__(self, on_submit=None, enable_voice=False):
         self.on_submit = on_submit
         self.enable_voice = enable_voice
+        
+        # Destroy any existing tk windows to prevent multiple instances
+        try:
+            for widget in tk._default_root.winfo_children() if tk._default_root else []:
+                widget.destroy()
+        except:
+            pass
+        
         self.root = tk.Tk()
         self.root.title("Zephyr")
         self.root.attributes("-topmost", True)
@@ -115,6 +123,10 @@ class Overlay:
         self.glow_animation_running = False
         self.typing_job = None  # Track typing animation job
         self.thinking_job = None  # Track thinking animation job
+        self.processing = False  # Track if command is being processed
+        
+        # Protocol for window close
+        self.root.protocol("WM_DELETE_WINDOW", self.cleanup)
 
 
     def _submit(self, _):
@@ -124,6 +136,7 @@ class Overlay:
         
         self.entry.delete(0, tk.END)
         self.entry.config(state=tk.DISABLED)  # Disable while processing
+        self.processing = True
         
         # Clear previous response
         self.response.config(state=tk.NORMAL)
@@ -137,7 +150,7 @@ class Overlay:
         
         # Show typing indicator
         self.typing_indicator.pack(pady=(5, 5))
-        self._animate_typing()
+        self._animate_thinking()
         
         if self.on_submit:
             # Process in thread to keep UI responsive
@@ -145,15 +158,17 @@ class Overlay:
                 try:
                     reply = self.on_submit(text)
                     # Schedule UI update in main thread
-                    self.root.after(0, lambda r=reply: self._show_response(r))
+                    if self.processing:  # Only if not cancelled
+                        self.root.after(0, lambda r=reply: self._show_response(r))
                 except Exception as ex:
-                    self.root.after(0, lambda err=str(ex): self._show_response(f"Error: {err}"))
+                    if self.processing:  # Only if not cancelled
+                        self.root.after(0, lambda err=str(ex): self._show_response(f"Error: {err}"))
             
             threading.Thread(target=_process, daemon=True).start()
     
     def _show_response(self, reply):
-        # Only show response if we're still visible (not cancelled by Escape)
-        if not self.is_visible:
+        # Only show response if we're still visible and processing (not cancelled by Escape)
+        if not self.is_visible or not self.processing:
             return
             
         # Hide typing indicator
@@ -162,6 +177,7 @@ class Overlay:
         # Re-enable entry
         self.entry.config(state=tk.NORMAL)
         self.entry.focus_set()
+        self.processing = False
         
         if reply:
             # Type out the response with animation
@@ -172,7 +188,7 @@ class Overlay:
     def _type_text(self, text, index=0):
         """Animated typing effect for scrollable text widget"""
         # Check if we should still be typing (not cancelled)
-        if not self.is_visible:
+        if not self.is_visible or not self.processing:
             return
             
         if index < len(text):
@@ -185,10 +201,11 @@ class Overlay:
         else:
             self.response.config(state=tk.DISABLED)
             self.typing_job = None
+            self.processing = False
     
-    def _animate_typing(self):
+    def _animate_thinking(self):
         """Animate typing indicator with sparkles"""
-        if self.entry['state'] == tk.DISABLED and self.is_visible:
+        if self.entry['state'] == tk.DISABLED and self.is_visible and self.processing:
             current = self.typing_indicator.cget("text")
             indicators = ["✨ Thinking...", "⭐ Thinking...", "💫 Thinking...", "✨ Thinking..."]
             try:
@@ -197,7 +214,7 @@ class Overlay:
             except ValueError:
                 next_idx = 0
             self.typing_indicator.config(text=indicators[next_idx])
-            self.thinking_job = self.root.after(300, self._animate_typing)
+            self.thinking_job = self.root.after(300, self._animate_thinking)
         else:
             self.thinking_job = None
 
@@ -270,6 +287,7 @@ class Overlay:
         
         self.is_animating = True
         self.is_visible = False  # Mark as hidden immediately to stop any running operations
+        self.processing = False  # Cancel any processing
         self.glow_animation_running = False  # Stop glow animation
         
         # Cancel any pending animations
@@ -293,6 +311,24 @@ class Overlay:
         self.response.config(state=tk.DISABLED)
         
         self._slide_out()
+    
+    def cleanup(self):
+        """Complete cleanup of overlay"""
+        self.processing = False
+        self.is_visible = False
+        self.glow_animation_running = False
+        
+        # Cancel all animations
+        if self.typing_job:
+            self.root.after_cancel(self.typing_job)
+        if self.thinking_job:
+            self.root.after_cancel(self.thinking_job)
+        
+        try:
+            self.root.quit()
+            self.root.destroy()
+        except:
+            pass
     
     def _slide_out(self, step=0):
         """Smooth slide-out animation to right"""
@@ -340,8 +376,18 @@ _overlay_instance = None
 
 def open_popup(on_submit=None, enable_voice=False):
     global _overlay_instance
-    if _overlay_instance is None:
-        _overlay_instance = Overlay(on_submit=on_submit, enable_voice=enable_voice)
+    
+    # Force destroy old instance if it exists
+    if _overlay_instance is not None:
+        try:
+            _overlay_instance.root.quit()
+            _overlay_instance.root.destroy()
+        except:
+            pass
+        _overlay_instance = None
+    
+    # Create fresh instance
+    _overlay_instance = Overlay(on_submit=on_submit, enable_voice=enable_voice)
     _overlay_instance.show()
     return _overlay_instance
 
