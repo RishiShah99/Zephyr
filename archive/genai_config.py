@@ -1,8 +1,15 @@
 import os
 import google.generativeai as genai
-from api_keys import GEMINI_API_KEY
+
+try:
+    from api_keys import GEMINI_API_KEY
+except Exception:
+    GEMINI_API_KEY = None
 
 def get_model():
+    if not GEMINI_API_KEY:
+        return None
+    
     genai.configure(api_key=GEMINI_API_KEY)
     
     generation_config = {

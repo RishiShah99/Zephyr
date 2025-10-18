@@ -1,15 +1,31 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from api_keys import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI
+
+try:
+    from api_keys import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI
+except Exception:
+    SPOTIFY_CLIENT_ID = None
+    SPOTIFY_CLIENT_SECRET = None
+    SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback"
 
 scope = "user-read-playback-state,user-modify-playback-state,user-read-currently-playing"
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
-                                               client_secret=SPOTIFY_CLIENT_SECRET,
-                                               redirect_uri=SPOTIFY_REDIRECT_URI,
-                                               scope=scope))
+# Only initialize if keys are available
+sp = None
+if SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET:
+    try:
+        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIFY_CLIENT_ID,
+                                                   client_secret=SPOTIFY_CLIENT_SECRET,
+                                                   redirect_uri=SPOTIFY_REDIRECT_URI,
+                                                   scope=scope))
+    except Exception:
+        sp = None
+
 
 def play_song(song_name):
+    if sp is None:
+        return "Spotify not configured. Add your Spotify API keys to api_keys.py"
+    
     devices = sp.devices()
     if not devices['devices']:
         return "No active devices found. Please start Spotify on a device."
@@ -29,15 +45,22 @@ def play_song(song_name):
     else:
         return "Song not found."
 
+
 def pause_song():
+    if sp is None:
+        return "Spotify not configured. Add your Spotify API keys to api_keys.py"
     sp.pause_playback()
     return "Playback paused."
 
 def skip_song():
+    if sp is None:
+        return "Spotify not configured. Add your Spotify API keys to api_keys.py"
     sp.next_track()
     return "Skipped to the next song."
 
 def get_current_song():
+    if sp is None:
+        return "Spotify not configured. Add your Spotify API keys to api_keys.py"
     current = sp.current_playback()
     if current and current['is_playing']:
         song = current['item']['name']

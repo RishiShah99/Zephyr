@@ -1,0 +1,18 @@
+{
+  "hotkey": "ctrl+alt+z",
+  "wake_word_enabled": false,
+  "offline_mode": false,
+  "enable_voice": false,
+  "enable_gemini": true,
+  "mood": {
+    "rate": 200,
+    "volume": 1.0
+  },
+  "ui": {
+    "position": "bottom-right",
+    "theme": "dark-glassmorphism"
+  },
+  "news_feeds": [
+    "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en"
+  ]
+}
