@@ -42,7 +42,8 @@ def understand_command(user_input: str) -> Dict[str, Any]:
         return {"intent": "unknown", "entities": {}, "natural_response": False}
     
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        # Use gemini-1.5-flash (newer, faster model)
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # System prompt to teach Gemini about Zephyr's capabilities
         system_prompt = """You are a command interpreter for Zephyr, an AI assistant. 
@@ -120,7 +121,8 @@ def generate_natural_response(user_input: str, context: str = "") -> str:
         return "I'm here to help! Try commands like 'play music', 'weather in [city]', 'create project [name]', or 'news about [topic]'."
     
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        # Use gemini-1.5-flash (newer, faster model)
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         personality_prompt = """You are Zephyr, a helpful AI assistant inspired by Jarvis from Iron Man.
 You are witty, intelligent, slightly sarcastic but always helpful. Keep responses concise (2-3 sentences max).
