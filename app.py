@@ -30,9 +30,12 @@ def main():
     if keyboard is not None and hotkey:
         try:
             keyboard.add_hotkey(hotkey, lambda: _toggle(overlay))
-            print(f"Hotkey registered: {hotkey}")
+            print(f"✅ Global hotkey registered: {hotkey.upper()}")
+            print(f"   Press {hotkey.upper()} anywhere on your system to open Zephyr!")
         except Exception as e:
-            print(f"Failed to register hotkey: {e}")
+            print(f"❌ Failed to register global hotkey: {e}")
+            print(f"   On Windows, you need to run as Administrator for system-wide hotkeys.")
+            print(f"   Right-click start_zephyr_admin.bat and select 'Run as administrator'")
     else:
         print("'keyboard' module not available — global hotkey disabled. Install with 'pip install keyboard'.")
 

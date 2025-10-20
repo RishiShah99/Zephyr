@@ -11,10 +11,14 @@ __pycache__/
 venv/
 env/
 
-# Documentation (keep local only, not on GitHub)
-*.md
-!README.md
-!ZEPHYR_CAPABILITIES.md
+# Excessive documentation (keep only README)
+COMPLETE_GUIDE.md
+DEPLOYMENT_COMPLETE.md
+QUICK_START.md
+SETUP_COMPLETE.md
+START_HERE.md
+WORKING_NOW.md
+ZEPHYR_CAPABILITIES.md
 
 # Archive folder (keep local only)
 archive/
@@ -22,9 +26,13 @@ archive/
 # Data folder (your private data)
 data/
 
-# Credentials
+# Credentials & cache
 credentials.json
 token.pickle
+.cache
+
+# Logs
+*.log
 
 # IDE
 .vscode/

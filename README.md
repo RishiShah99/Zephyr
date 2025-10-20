@@ -1,103 +1,93 @@
-# 🚀 Zephyr - Your Personal Jarvis AI Assistant# Zephyr: Personal desktop copilot
+# Zephyr
 
+Zephyr is a keyboard-activated AI assistant for Windows that provides natural language interaction with your computer. Press Ctrl+Alt+Z from anywhere to open a minimal overlay interface and interact with various system functions through conversation.
 
+## Overview
 
-# 🚀 Zephyr - Your Personal Jarvis AI Assistant
+Zephyr uses Groq's LLM API to understand natural language commands and execute actions like controlling Spotify, checking weather, reading news, and managing projects. The interface is designed to be unobtrusive, appearing only when summoned via hotkey and disappearing after completing a task.
 
-**Talk to your PC like Iron Man talks to Jarvis!**
+## Architecture
 
-Zephyr is a keyboard-activated AI assistant with a **stunning holographic interface**. Press **Ctrl+Alt+Z** from anywhere and watch your personal AI materialize with glowing blue effects, smooth animations, and natural conversation powered by Google Gemini.
+The system consists of several core components:
 
----
+- `app.py` - Main entry point that registers the global hotkey and manages the UI lifecycle
+- `ui.py` - Tkinter-based overlay interface with minimal dark theme
+- `assistant.py` - Command router that processes user input and delegates to appropriate handlers
+- `groq_nlp.py` - Natural language understanding via Groq's Llama 3.1 8B model
+- `gemini_nlp.py` - Alternative NLP backend using Google Gemini (fallback option)
 
-## ⚡ QUICK START (30 Seconds)
+Feature modules handle specific domains:
+- `spotify.py` - Music playback control via Spotipy
+- `weather.py` - Weather information via WeatherAPI
+- `news_rss.py` - News aggregation from RSS feeds
+- `planner.py` - Calendar event management via Google Calendar API
+- `projects.py` - Local project tracking with JSON storage
+- `memory.py` - Simple fact storage and retrieval system
+- `workspace.py` - Development workspace launcher
+- `scenes.py` - Smart home scene execution
 
-1. **Clone & Setup:**
-   ```powershell
-   git clone https://github.com/RishiShah99/Zephyr.git
-   cd Zephyr
-   python -m venv venv
-   venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+## Setup
 
-2. **Add Your Gemini API Key:**
-   - Get free key: https://aistudio.google.com/app/apikey
-   - Open `api_keys.py`
-   - Replace: `GEMINI_API_KEY = "your_key_here"`
+Requirements:
+- Python 3.8+
+- Windows OS (uses keyboard library for global hotkey)
+- API keys for Groq and optional services (Spotify, WeatherAPI, etc.)
 
-3. **Run Zephyr:**
-   ```powershell
-   python app.py
-   ```
+Installation:
+```powershell
+git clone https://github.com/RishiShah99/Zephyr.git
+cd Zephyr
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-4. **Press Ctrl+Alt+Z** and say hello to your AI! ✨
+Configuration:
+- Add your Groq API key to `api_keys.py`
+- Optionally add keys for Spotify, WeatherAPI, and other services
+- Adjust settings in `config.json` (hotkey, theme, etc.)
 
----
+## Usage
 
-## ✨ WHAT IT LOOKS LIKE
+Run the assistant:
+```powershell
+python app.py
+```
 
-- 🔵 **Holographic transparent blue avatar** that pulses
-- 💫 **Glowing border effects** that cycle through cyan
-- 🌊 **Smooth slide-in animations**
-- 📜 **Scrollable responses** with typing effects
-- 🎯 **Modern sci-fi interface** inspired by Iron Man
+Press Ctrl+Alt+Z to open the interface. Type naturally:
+- "play bohemian rhapsody"
+- "weather in london"
+- "news about technology"
+- "create project portfolio website"
+- "tell me about quantum computing"
 
----
+The interface dismisses automatically after responding. Press Escape to close manually.
 
-## 🎯 WHAT IT CAN DO
+## Background Execution
 
-### 🧠 Natural Language Understanding
-Talk naturally - no rigid commands!
-- "play some billie eilish"
-- "what's the weather in new york?"
-- "tell me a joke"
-- "create a project for my portfolio"
+To run Zephyr on startup:
+1. The included `Zephyr.bat` script handles background execution
+2. Place it in your Windows Startup folder: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
+3. Uses `pythonw.exe` for windowless operation
 
-### 🎵 Spotify Control
-- Play, pause, skip songs
-- "what's playing?"
-- Hands-free music control
+## API Integration
 
-### 🌤️ Weather Information
-- Any city worldwide
-- Current conditions & temperature
+Zephyr uses Groq's free tier (14,400 requests/day) for natural language understanding. The `llama-3.1-8b-instant` model provides fast inference suitable for real-time interaction.
 
-### 📰 News & Information  
-- "news about AI"
-- Clean responses (no references!)
-- Powered by Google News RSS
+Optional integrations:
+- Spotify: Requires OAuth setup via developer dashboard
+- WeatherAPI: Free tier provides current conditions
+- Google Calendar: Requires OAuth credentials
+- News: Uses public RSS feeds (no key required)
 
-### 📁 Project Management
-- Track your projects locally
-- "new project My Website"
-- "list projects"
+## Technical Notes
 
-### 🧠 Memory System
-- "remember I need to call mom"
-- "recall birthday"
-- Private, local storage
+The NLP system uses a structured prompt that teaches the model about available intents and expected JSON response format. Commands are parsed into intent + entities, then routed to appropriate handlers. For simple pattern matching (when AI is disabled), regex-based fallback parsing is available.
 
-### 💬 General Chat
-- Ask questions
-- Get explanations
-- Conversational AI (Jarvis-like!)
+The UI uses Tkinter with custom styling to achieve a minimal dark theme. Window positioning, auto-resize, and dynamic scrollbar behavior are handled to maintain a clean appearance.
 
-**📖 See [ZEPHYR_CAPABILITIES.md](ZEPHYR_CAPABILITIES.md) for complete feature list!**
+Data is stored locally in JSON files under the `data/` directory. No cloud storage or telemetry is implemented.
 
----
-
-## 🔑 API KEYS
-
-### **Priority 1: Gemini AI** (5 min - FREE)
-🔗 https://aistudio.google.com/app/apikey
-→ **ESSENTIAL** for natural language!
-
-### **Priority 2: WeatherAPI** (5 min - FREE)
-🔗 https://www.weatherapi.com/
-→ Get weather anywhere
-
-### **Priority 3: Spotify** (10 min - FREE)
 🔗 https://developer.spotify.com/dashboard
 → Control your music
 

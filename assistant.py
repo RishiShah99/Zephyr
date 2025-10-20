@@ -17,6 +17,12 @@ try:
 except Exception:
     HAS_GEMINI = False
 
+try:
+    from groq_nlp import understand_command as groq_understand, chat as groq_chat
+    HAS_GROQ = True
+except Exception:
+    HAS_GROQ = False
+
 
 def _extract_after(command: str, keyword: str) -> Optional[str]:
     idx = command.lower().find(keyword)
@@ -27,8 +33,8 @@ def _extract_after(command: str, keyword: str) -> Optional[str]:
 
 def handle_command(command: str, ask: Optional[Callable[[str], str]] = None, use_gemini: bool = True) -> str:
     """
-    Smart command handler that uses Gemini AI for natural language understanding.
-    Falls back to regex patterns if Gemini is unavailable or disabled.
+    Smart command handler that uses Groq/Gemini AI for natural language understanding.
+    Falls back to regex patterns if AI is unavailable or disabled.
     ask(prompt) can be provided to collect follow-ups (e.g., via UI) when details are missing.
     """
     if not command:
@@ -36,17 +42,25 @@ def handle_command(command: str, ask: Optional[Callable[[str], str]] = None, use
 
     cmd = command.lower().strip()
     
-    # Try Gemini NLP first if enabled
-    if use_gemini and HAS_GEMINI:
+    # Try Groq NLP first (preferred), then Gemini as fallback
+    if use_gemini and (HAS_GROQ or HAS_GEMINI):
         try:
-            understanding = gemini_understand(command)
-            intent = understanding.get("intent", "unknown")
-            entities = understanding.get("entities", {})
-            natural_response = understanding.get("natural_response", False)
+            # Use Groq if available, otherwise fall back to Gemini
+            if HAS_GROQ:
+                intent, entities, natural_response = groq_understand(command)
+                chat_func = groq_chat
+            else:
+                understanding = gemini_understand(command)
+                intent = understanding.get("intent", "unknown")
+                entities = understanding.get("entities", {})
+                natural_response = understanding.get("natural_response", False)
+                chat_func = gemini_chat
             
-            # If it's general chat, use Gemini to respond
+            print(f"[DEBUG] Intent: {intent}, Entities: {entities}, Natural: {natural_response}")
+            
+            # If it's general chat, use AI to respond
             if intent == "chat" or natural_response:
-                return gemini_chat(command)
+                return chat_func(command)
             
             # Execute structured commands based on intent
             if intent == "play_music":
@@ -82,9 +96,13 @@ def handle_command(command: str, ask: Optional[Callable[[str], str]] = None, use
             
             if intent == "get_news":
                 topic = entities.get("topic")
-                if HAS_RSS:
-                    return get_news_rss(topic or "technology", limit=5)
-                return "News service unavailable."
+                try:
+                    if HAS_RSS:
+                        return get_news_rss(topic or "technology", limit=5)
+                    return "News service unavailable."
+                except Exception as e:
+                    print(f"[ERROR] News failed: {e}")
+                    return "Sorry, couldn't fetch the news right now."
             
             if intent == "create_project":
                 name = entities.get("project_name")

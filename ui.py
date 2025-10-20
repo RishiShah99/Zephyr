@@ -20,107 +20,128 @@ class Overlay:
         self.root.title("Zephyr")
         self.root.attributes("-topmost", True)
         self.root.overrideredirect(True)
+        self.root.attributes("-alpha", 0.0)  # Start invisible
         
-        # Holographic transparent background
-        self.root.configure(bg="#000814")
-        self.root.attributes("-alpha", 0.95)  # Slight transparency for hologram effect
+        # Ultra-clean minimal theme (Copilot-inspired)
+        BG_DARK = "#1A1A1A"          # Pure dark background
+        BG_CARD = "#252526"          # Subtle card
+        BG_INPUT = "#2A2A2A"         # Input background (dark grey)
+        ACCENT_PRIMARY = "#0E639C"   # Calm blue accent
+        ACCENT_BORDER = "#3A3A3A"    # Subtle border
+        TEXT_PRIMARY = "#CCCCCC"     # Light grey text
+        TEXT_SECONDARY = "#666666"   # Darker grey for placeholder
         
-        # Position bottom-right - BIGGER for scrolling
+        self.root.configure(bg=BG_DARK)
+        
+        # Even more compact!
         self.root.update_idletasks()
-        self.width = 650
-        self.height = 480
+        self.width = 380
+        self.height = 200  # Start very small
+        self.max_height = 500  # Maximum when response is large
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
-        self.target_x = screen_w - self.width - 20
-        self.target_y = screen_h - self.height - 50
+        self.target_x = screen_w - self.width - 30
+        self.target_y = screen_h - self.height - 70
         
-        # Start position (offscreen to the right for slide-in)
-        self.start_x = screen_w
-        self.start_y = self.target_y
+        self.start_x = self.target_x
+        self.start_y = screen_h
         self.root.geometry(f"{self.width}x{self.height}+{self.start_x}+{self.start_y}")
         
-        # Outer glow container (holographic border)
-        self.frame = tk.Frame(self.root, bg="#00F0FF", highlightthickness=0)
-        self.frame.pack(fill=tk.BOTH, expand=True, padx=3, pady=3)
+        # Subtle border - minimal like Copilot
+        self.border_frame = tk.Frame(self.root, bg=ACCENT_BORDER, highlightthickness=0)
+        self.border_frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
         
-        # Inner frame with holographic dark background
-        self.inner_frame = tk.Frame(self.frame, bg="#001D3D")
-        self.inner_frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+        # Main container
+        self.main_container = tk.Frame(self.border_frame, bg=BG_DARK)
+        self.main_container.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
         
-        # HOLOGRAPHIC HEAD at top
-        head_frame = tk.Frame(self.inner_frame, bg="#001D3D")
-        head_frame.pack(fill=tk.X, pady=(15, 5))
+        # Minimal header - compact and clean
+        header_frame = tk.Frame(self.main_container, bg=BG_DARK)
+        header_frame.pack(fill=tk.X, padx=14, pady=(10, 6))
         
-        # Zephyr hologram avatar
-        self.avatar = tk.Label(
-            head_frame,
-            text="◉",  # Simple circle for holographic head
-            font=("Segoe UI", 72, "bold"),
-            bg="#001D3D",
-            fg="#00F0FF"
+        title_label = tk.Label(
+            header_frame,
+            text="🌙 Zephyr",  # Cool moon icon
+            fg=TEXT_PRIMARY,
+            bg=BG_DARK,
+            font=("Segoe UI", 10, "bold")
         )
-        self.avatar.pack()
+        title_label.pack(anchor="w")
         
-        # Assistant name
-        self.label = tk.Label(
-            head_frame,
-            text="ZEPHYR",
-            fg="#00F0FF",
-            bg="#001D3D",
-            font=("Segoe UI", 16, "bold"),
-            anchor="center"
-        )
-        self.label.pack(pady=(5, 0))
+        # Content area - minimal padding
+        content_frame = tk.Frame(self.main_container, bg=BG_DARK)
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=14, pady=(0, 10))
         
-        # Holographic divider
-        divider = tk.Frame(self.inner_frame, bg="#00F0FF", height=1)
-        divider.pack(fill=tk.X, padx=30, pady=10)
-        
-        # Modern entry with holographic glow
-        entry_container = tk.Frame(self.inner_frame, bg="#00F0FF", highlightthickness=0)
-        entry_container.pack(fill=tk.X, padx=25, pady=(0, 15))
+        # Clean input field - right below header
+        self.input_container = tk.Frame(content_frame, bg=BG_INPUT, highlightthickness=0)
+        self.input_container.pack(fill=tk.X, pady=(0, 10))
         
         self.entry = tk.Entry(
-            entry_container,
-            bg="#002855",
-            fg="#FFFFFF",
-            insertbackground="#00F0FF",
-            font=("Segoe UI", 12),
+            self.input_container,
+            bg=BG_INPUT,
+            fg=TEXT_PRIMARY,
+            insertbackground=TEXT_PRIMARY,
+            font=("Segoe UI", 9),
             relief=tk.FLAT,
             borderwidth=0
         )
-        self.entry.pack(fill=tk.X, padx=2, pady=2, ipady=6)
-        self.entry.focus_set()
+        self.entry.pack(fill=tk.X, padx=10, pady=8)
         self.entry.bind("<Return>", self._submit)
         
-        # Response area with SCROLLING - holographic theme
-        response_container = tk.Frame(self.inner_frame, bg="#001D3D")
-        response_container.pack(fill=tk.BOTH, expand=True, padx=25, pady=(0, 20))
+        # Placeholder management
+        self.placeholder_active = True
+        self.entry.insert(0, "Ask anything...")
+        self.entry.config(fg=TEXT_SECONDARY)
+        self.entry.bind("<FocusIn>", self._clear_placeholder)
+        self.entry.bind("<FocusOut>", self._restore_placeholder)
         
-        self.response = scrolledtext.ScrolledText(
-            response_container,
-            bg="#000814",
-            fg="#94D2FF",
-            insertbackground="#00F0FF",
-            font=("Segoe UI", 11),
+        # Response area with auto-showing scrollbar
+        self.response_frame = tk.Frame(content_frame, bg=BG_DARK)
+        self.response_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Scrollbar (hidden by default, only shows when needed)
+        self.scrollbar = tk.Scrollbar(self.response_frame, bg=BG_DARK, troughcolor=BG_DARK, activebackground=TEXT_SECONDARY)
+        
+        self.response = tk.Text(
+            self.response_frame,
+            bg=BG_DARK,
+            fg=TEXT_PRIMARY,
+            font=("Segoe UI", 9),
             relief=tk.FLAT,
             borderwidth=0,
-            padx=18,
-            pady=18,
+            padx=0,
+            pady=0,
             wrap=tk.WORD,
-            height=10,
-            state=tk.DISABLED  # Read-only
+            height=1,
+            state=tk.DISABLED,
+            highlightthickness=0,
+            yscrollcommand=self._on_scroll
         )
-        self.response.pack(fill=tk.BOTH, expand=True)
+        self.response.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        # Typing indicator (hidden by default)
-        self.typing_indicator = tk.Label(
-            response_container,
-            text="◉ Processing...",
-            fg="#00F0FF",
-            bg="#001D3D",
-            font=("Segoe UI", 10, "italic")
+        # Configure scrollbar
+        self.scrollbar.config(command=self.response.yview)
+        
+        # Status indicator - minimal
+        self.status_container = tk.Frame(self.main_container, bg=BG_DARK)
+        self.status_label = tk.Label(
+            self.status_container,
+            text="",
+            fg=TEXT_SECONDARY,
+            bg=BG_DARK,
+            font=("Segoe UI", 9)
         )
+        
+        # Store colors for animations
+        self.colors = {
+            'bg_dark': BG_DARK,
+            'bg_card': BG_CARD,
+            'bg_input': BG_INPUT,
+            'accent_primary': ACCENT_PRIMARY,
+            'accent_border': ACCENT_BORDER,
+            'text_primary': TEXT_PRIMARY,
+            'text_secondary': TEXT_SECONDARY
+        }
         
         self.root.bind("<Escape>", lambda e: self.hide())
         
@@ -135,14 +156,42 @@ class Overlay:
         # Protocol for window close
         self.root.protocol("WM_DELETE_WINDOW", self.cleanup)
 
+    def _on_scroll(self, first, last):
+        """Show/hide scrollbar based on content size"""
+        first, last = float(first), float(last)
+        
+        # Only show scrollbar if content doesn't fit (not everything is visible)
+        if first > 0.0 or last < 1.0:
+            self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        else:
+            self.scrollbar.pack_forget()
+        
+        # Update scrollbar
+        self.scrollbar.set(first, last)
+
+    def _clear_placeholder(self, event):
+        """Clear placeholder text on focus"""
+        if self.placeholder_active:
+            self.entry.delete(0, tk.END)
+            self.entry.config(fg=self.colors['text_primary'])
+            self.placeholder_active = False
+    
+    def _restore_placeholder(self, event):
+        """Restore placeholder if empty"""
+        if not self.entry.get():
+            self.entry.insert(0, "Ask anything...")
+            self.entry.config(fg=self.colors['text_secondary'])
+            self.placeholder_active = True
 
     def _submit(self, _):
         text = self.entry.get().strip()
-        if not text:
+        if not text or self.placeholder_active:
             return
         
+        # Clear input and keep dark background
         self.entry.delete(0, tk.END)
-        self.entry.config(state=tk.DISABLED)  # Disable while processing
+        self.placeholder_active = False
+        self.entry.config(state=tk.DISABLED, disabledforeground=self.colors['text_secondary'], disabledbackground=self.colors['bg_input'])
         self.processing = True
         
         # Clear previous response
@@ -155,8 +204,10 @@ class Overlay:
             self.root.after_cancel(self.typing_job)
             self.typing_job = None
         
-        # Show typing indicator
-        self.typing_indicator.pack(pady=(5, 5))
+        # Show sleek processing status
+        self.status_container.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=(0, 16))
+        self.status_label.config(text="")
+        self.status_label.pack()
         self._animate_thinking()
         
         if self.on_submit:
@@ -178,15 +229,15 @@ class Overlay:
         if not self.is_visible or not self.processing:
             return
             
-        # Hide typing indicator
-        self.typing_indicator.pack_forget()
+        # Hide status
+        self.status_label.pack_forget()
         
-        # Re-enable entry (but keep processing=True until typing is done)
-        self.entry.config(state=tk.NORMAL)
+        # Re-enable entry with placeholder ready
+        self.entry.config(state=tk.NORMAL, bg=self.colors['bg_input'], fg=self.colors['text_primary'])
         self.entry.focus_set()
         
         if reply:
-            # Type out the response with animation (processing flag cleared in _type_text when done)
+            # Type out the response with animation
             self._type_text(reply)
             if self.enable_voice:
                 self.say(reply)
@@ -195,106 +246,99 @@ class Overlay:
             self.processing = False
     
     def _type_text(self, text, index=0):
-        """Animated typing effect for scrollable text widget"""
-        # Check if we should still be typing (not cancelled by Escape)
+        """Animated typing with auto-expanding window"""
         if not self.is_visible:
             return
             
         if index < len(text):
             self.response.config(state=tk.NORMAL)
             self.response.insert(tk.END, text[index])
-            self.response.see(tk.END)  # Auto-scroll to bottom
             self.response.config(state=tk.DISABLED)
-            # Faster typing speed (10ms per character)
-            self.typing_job = self.root.after(10, lambda: self._type_text(text, index + 1))
+            
+            # Auto-expand window based on content
+            self._auto_resize()
+            
+            # Fast typing (8ms per character)
+            self.typing_job = self.root.after(8, lambda: self._type_text(text, index + 1))
         else:
             self.response.config(state=tk.DISABLED)
             self.typing_job = None
-            self.processing = False  # Done typing, clear flag
+            self.processing = False
+    
+    def _auto_resize(self):
+        """Dynamically resize window based on content"""
+        # Calculate required height for text
+        self.response.update_idletasks()
+        line_count = int(self.response.index('end-1c').split('.')[0])
+        
+        # Calculate new height (line_height * lines + padding)
+        line_height = 20
+        content_height = min(line_count * line_height, 300)  # Max 300px for response
+        new_height = min(self.height + content_height - 100, self.max_height)
+        
+        # Smoothly resize if needed
+        if new_height > self.height:
+            self.height = new_height
+            new_y = self.root.winfo_screenheight() - self.height - 70
+            self.root.geometry(f"{self.width}x{self.height}+{self.target_x}+{new_y}")
     
     def _animate_thinking(self):
-        """Animate holographic processing indicator"""
+        """Smooth, modern processing animation"""
         if self.entry['state'] == tk.DISABLED and self.is_visible and self.processing:
-            current = self.typing_indicator.cget("text")
-            indicators = ["◉ Processing...", "◎ Processing...", "○ Processing...", "◎ Processing..."]
+            current = self.status_label.cget("text")
+            # Sleek loading animation
+            indicators = [
+                "⚡ Thinking",
+                "⚡ Thinking ·",
+                "⚡ Thinking · ·",
+                "⚡ Thinking · · ·",
+                "⚡ Thinking · ·",
+                "⚡ Thinking ·"
+            ]
             try:
                 idx = indicators.index(current)
                 next_idx = (idx + 1) % len(indicators)
             except ValueError:
                 next_idx = 0
-            self.typing_indicator.config(text=indicators[next_idx])
-            self.thinking_job = self.root.after(300, self._animate_thinking)
+            self.status_label.config(text=indicators[next_idx])
+            self.thinking_job = self.root.after(180, self._animate_thinking)  # Smoother, faster
         else:
             self.thinking_job = None
 
     def show(self):
-        """Slide in from right with smooth animation"""
+        """Clean slide-in animation"""
         if self.is_visible or self.is_animating:
             return
         
         self.is_animating = True
         self.is_visible = True
         self.root.deiconify()
-        self.root.attributes("-alpha", 0.0)  # Start transparent
+        self.root.attributes("-alpha", 0.0)
         
-        # Sparkle animation
-        self._sparkle_animation()
-        
-        # Start glow pulse animation
-        self.glow_animation_running = True
-        self._glow_pulse()
-        
-        # Slide and fade in
+        # Simple slide in - no flashy animations
         self._slide_in()
     
-    def _glow_pulse(self, step=0):
-        """Continuous holographic pulsing glow effect"""
-        if not self.glow_animation_running:
-            return
-        
-        # Cycle through holographic cyan/blue variations
-        colors = ["#00F0FF", "#00D4FF", "#00B8FF", "#00D4FF", "#00F0FF", "#0AF8FF"]
-        color = colors[step % len(colors)]
-        self.frame.configure(bg=color)
-        
-        # Pulse the avatar hologram too
-        avatar_colors = ["#00F0FF", "#00D4FF", "#00C8FF", "#00D4FF", "#00F0FF", "#12FFFF"]
-        self.avatar.configure(fg=avatar_colors[step % len(avatar_colors)])
-        
-        self.root.after(140, lambda: self._glow_pulse(step + 1))
-    
     def _slide_in(self, step=0):
-        """Smooth slide-in animation from right"""
+        """Smooth, minimal slide-up"""
         steps = 20
         if step <= steps:
-            # Easing function (ease-out cubic)
+            # Smooth ease-out
             progress = step / steps
             eased = 1 - pow(1 - progress, 3)
             
-            # Calculate position
-            current_x = int(self.start_x + (self.target_x - self.start_x) * eased)
-            self.root.geometry(f"{self.width}x{self.height}+{current_x}+{self.target_y}")
+            # Slide up
+            current_y = int(self.start_y + (self.target_y - self.start_y) * eased)
+            self.root.geometry(f"{self.width}x{self.height}+{self.target_x}+{current_y}")
             
-            # Fade in to 95% for holographic transparency
-            alpha = eased * 0.95
+            # Fade in smoothly
+            alpha = min(0.97, eased * 0.97)
             self.root.attributes("-alpha", alpha)
             
-            # Continue animation
-            self.root.after(16, lambda: self._slide_in(step + 1))  # ~60 FPS
+            self.root.after(10, lambda: self._slide_in(step + 1))
         else:
             self.is_animating = False
             self.entry.focus_set()
     
-    def _sparkle_animation(self, count=0):
-        """Holographic avatar pulse animation"""
-        if count < 10:
-            # Pulse the holographic head
-            sizes = [72, 74, 76, 78, 76, 74, 72, 70, 68, 70]
-            self.avatar.config(font=("Segoe UI", sizes[count], "bold"))
-            self.root.after(90, lambda: self._sparkle_animation(count + 1))
-        else:
-            self.avatar.config(font=("Segoe UI", 72, "bold"))
-
     def hide(self):
         """Slide out to right with smooth animation and reset state"""
         if not self.is_visible or self.is_animating:
@@ -313,8 +357,8 @@ class Overlay:
             self.root.after_cancel(self.thinking_job)
             self.thinking_job = None
         
-        # Hide typing indicator
-        self.typing_indicator.pack_forget()
+        # Hide status label
+        self.status_label.pack_forget()
         
         # Re-enable entry and clear it
         self.entry.config(state=tk.NORMAL)
@@ -346,27 +390,22 @@ class Overlay:
             pass
     
     def _slide_out(self, step=0):
-        """Smooth slide-out animation to right"""
+        """Clean slide-down"""
         steps = 15
         if step <= steps:
-            # Easing function (ease-in cubic)
             progress = step / steps
-            eased = pow(progress, 3)
+            eased = pow(progress, 2)
             
-            # Calculate position
-            current_x = int(self.target_x + (self.start_x - self.target_x) * eased)
-            self.root.geometry(f"{self.width}x{self.height}+{current_x}+{self.target_y}")
+            current_y = int(self.target_y + (self.start_y - self.target_y) * eased)
+            self.root.geometry(f"{self.width}x{self.height}+{self.target_x}+{current_y}")
             
-            # Fade out
             alpha = 0.97 * (1 - eased)
             self.root.attributes("-alpha", alpha)
             
-            # Continue animation
-            self.root.after(16, lambda: self._slide_out(step + 1))
+            self.root.after(10, lambda: self._slide_out(step + 1))
         else:
             self.root.withdraw()
             self.is_animating = False
-            # is_visible already set to False in hide()
 
     def loop(self):
         self.root.mainloop()
