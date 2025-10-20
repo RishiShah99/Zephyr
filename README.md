@@ -94,26 +94,3 @@ Data is stored locally in JSON files under the `data/` directory. No cloud stora
 **Optional:** NewsAPI, Google Calendar
 
 📖 See [COMPLETE_GUIDE.md](COMPLETE_GUIDE.md) for detailed setup!
-
----
-
-## 🎮 USAGE
-
-```powershell
-# Start Zephyr
-python app.py
-
-# You'll see:
-"Hotkey registered: ctrl+alt+z"
-
-# Press Ctrl+Alt+Z from anywhere!
-# Beautiful holographic interface slides in
-
-# Talk naturally:
-"play some music"
-"weather in london"  
-"create project My Blog"
-"tell me about quantum physics"
-
-# Press Escape or Ctrl+Alt+Z to dismiss
-```
