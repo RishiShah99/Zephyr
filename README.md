@@ -92,5 +92,3 @@ Data is stored locally in JSON files under the `data/` directory. No cloud stora
 → Control your music
 
 **Optional:** NewsAPI, Google Calendar
-
-📖 See [COMPLETE_GUIDE.md](COMPLETE_GUIDE.md) for detailed setup!
