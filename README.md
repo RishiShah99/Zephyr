@@ -282,16 +282,6 @@ npm run format
 - **API Keys Required**: Core AI features need Groq/OpenAI API access
 - **Network Dependent**: Weather, music, and some AI features require internet
 
-## Roadmap
-
-- [ ] Multi-platform support (macOS, Linux)
-- [ ] Cloud sync for memories and projects
-- [ ] Plugin system for custom integrations
-- [ ] Mobile companion app
-- [ ] Advanced calendar integration
-- [ ] Team collaboration features
-- [ ] Offline AI model support
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -301,7 +291,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
----
-
-**Made by Rishi Shah**
