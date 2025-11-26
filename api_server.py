@@ -29,8 +29,7 @@ CORS(app)  # Enable CORS for Electron app
 MEMORY_FILE = "memory.json"
 PROJECTS_FILE = "projects.json"
 
-# ==================== HELPER FUNCTIONS ====================
-
+# Helper Functions
 def execute_intent(intent: str, entities: dict, original_command: str) -> str:
     """Execute the actual Zephyr command based on intent"""
     try:
@@ -167,8 +166,7 @@ def save_memory(memory_data):
     with open(MEMORY_FILE, 'w') as f:
         json.dump(memory_data, f, indent=2)
 
-# ==================== API ENDPOINTS ====================
-
+# API endpoints
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -472,8 +470,6 @@ def run_test():
             'success': False,
             'error': str(e)
         }), 500
-
-# ==================== MAIN ====================
 
 if __name__ == '__main__':
     import sys
