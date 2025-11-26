@@ -66,7 +66,47 @@ class Overlay:
             bg=BG_DARK,
             font=("Segoe UI", 10, "bold")
         )
-        title_label.pack(anchor="w")
+        title_label.pack(side=tk.LEFT, anchor="w")
+        
+        # Expand button - launches full dashboard
+        expand_btn = tk.Label(
+            header_frame,
+            text="⛶ Expand",
+            fg=TEXT_SECONDARY,
+            bg=BG_DARK,
+            font=("Segoe UI", 8),
+            cursor="hand2"
+        )
+        expand_btn.pack(side=tk.RIGHT, anchor="e", padx=(0, 10))
+        expand_btn.bind("<Button-1>", lambda e: self._launch_dashboard())
+        
+        # Hover effect for expand button
+        def expand_on_enter(e):
+            expand_btn.config(fg=ACCENT_PRIMARY)
+        def expand_on_leave(e):
+            expand_btn.config(fg=TEXT_SECONDARY)
+        expand_btn.bind("<Enter>", expand_on_enter)
+        expand_btn.bind("<Leave>", expand_on_leave)
+        
+        # Restart button - minimal style
+        restart_btn = tk.Label(
+            header_frame,
+            text="↻ Restart",
+            fg=TEXT_SECONDARY,
+            bg=BG_DARK,
+            font=("Segoe UI", 8),
+            cursor="hand2"
+        )
+        restart_btn.pack(side=tk.RIGHT, anchor="e")
+        restart_btn.bind("<Button-1>", lambda e: self._restart_zephyr())
+        
+        # Hover effect for restart button
+        def on_enter(e):
+            restart_btn.config(fg=ACCENT_PRIMARY)
+        def on_leave(e):
+            restart_btn.config(fg=TEXT_SECONDARY)
+        restart_btn.bind("<Enter>", on_enter)
+        restart_btn.bind("<Leave>", on_leave)
         
         # Content area - minimal padding
         content_frame = tk.Frame(self.main_container, bg=BG_DARK)
@@ -153,8 +193,8 @@ class Overlay:
         self.thinking_job = None  # Track thinking animation job
         self.processing = False  # Track if command is being processed
         
-        # Protocol for window close
-        self.root.protocol("WM_DELETE_WINDOW", self.cleanup)
+        # Protocol for window close - hide instead of quit
+        self.root.protocol("WM_DELETE_WINDOW", self.hide)
 
     def _on_scroll(self, first, last):
         """Show/hide scrollbar based on content size"""
@@ -312,6 +352,10 @@ class Overlay:
         
         self.is_animating = True
         self.is_visible = True
+        
+        # Reset to default small size
+        self.height = 200
+        
         self.root.deiconify()
         self.root.attributes("-alpha", 0.0)
         
@@ -406,6 +450,98 @@ class Overlay:
         else:
             self.root.withdraw()
             self.is_animating = False
+    
+    def _launch_dashboard(self):
+        """Launch the full Zephyr dashboard app"""
+        import os
+        import subprocess
+        import threading
+        
+        def launch():
+            try:
+                dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard-app")
+                
+                # Check if dashboard exists
+                if not os.path.exists(dashboard_path):
+                    print(f"❌ Dashboard app not found at: {dashboard_path}")
+                    return
+                
+                print(f"Dashboard path: {dashboard_path}")
+                
+                # Check if npm is installed
+                try:
+                    result = subprocess.run(["npm", "--version"], capture_output=True, check=True, shell=True)
+                    npm_version = result.stdout.decode().strip()
+                    print(f"npm version: {npm_version}")
+                except Exception as npm_error:
+                    print(f"❌ npm not found: {npm_error}")
+                    return
+                
+                # Check if node_modules exists
+                node_modules_path = os.path.join(dashboard_path, "node_modules")
+                if not os.path.exists(node_modules_path):
+                    print(f"⚠️ Dependencies not installed. Run: cd dashboard-app && npm install")
+                    return
+                
+                print("Launching Zephyr Dashboard...")
+                
+                # Launch the dashboard silently without console windows
+                if os.name == 'nt':
+                    # Windows: hide the console window
+                    CREATE_NO_WINDOW = 0x08000000
+                    subprocess.Popen(
+                        ["npm", "run", "dev"],
+                        cwd=dashboard_path,
+                        shell=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=CREATE_NO_WINDOW
+                    )
+                else:
+                    # Unix-like systems
+                    subprocess.Popen(
+                        ["npm", "run", "dev"],
+                        cwd=dashboard_path,
+                        shell=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                
+                print("✅ Dashboard launched!")
+                
+                # Hide tiny Zephyr after launching dashboard
+                self.root.after(0, self.hide)
+                
+            except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
+                print(f"❌ Error launching dashboard: {e}\n{error_details}")
+        
+        # Launch in background thread to not block UI
+        threading.Thread(target=launch, daemon=True).start()
+    
+    def _restart_zephyr(self):
+        """Restart Zephyr - force kill and relaunch"""
+        import sys
+        import os
+        import subprocess
+        
+        print("Restarting Zephyr...")
+        
+        # Get the path to pythonw.exe and app.py
+        python_exe = sys.executable
+        app_path = os.path.join(os.path.dirname(__file__), "app.py")
+        
+        # If we're running with python.exe, use pythonw.exe instead
+        if python_exe.endswith("python.exe"):
+            python_exe = python_exe.replace("python.exe", "pythonw.exe")
+        
+        # Launch new instance in background
+        subprocess.Popen([python_exe, app_path], 
+                        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+        
+        # Force exit the entire Python process
+        os._exit(0)
 
     def loop(self):
         self.root.mainloop()
