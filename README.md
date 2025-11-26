@@ -59,26 +59,6 @@ Zephyr uses a three-tier architecture for maximum flexibility:
 - Framer Motion for smooth animations
 - Real-time data synchronization with API server
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  Zephyr System                      │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────────┐         ┌─────────────────┐     │
-│  │ Tiny Zephyr  │◄────────┤   API Server    │     │
-│  │ (Ctrl+Alt+Z) │         │   (Port 5000)   │     │
-│  └──────────────┘         └─────────────────┘     │
-│         │                         ▲                │
-│         │ Expand                  │                │
-│         ▼                         │                │
-│  ┌──────────────────────────────────┐              │
-│  │      Zephyr Dashboard            │              │
-│  │      (React + Electron)          │──────────────┘
-│  └──────────────────────────────────┘
-│
-└─────────────────────────────────────────────────────┘
-```
-
 ## Installation
 
 ### Prerequisites
@@ -170,11 +150,11 @@ python app.py
 - Or run: `cd dashboard-app && npm run dev`
 
 **Features:**
-- 🧠 **Memory Tab** - View, add, delete stored facts and contexts
-- 💡 **Projects Tab** - Track ideas and project details  
-- 🎵 **Music Controls** - Spotify integration
-- 🧪 **Test Zone** - Try commands and see responses
-- 📊 **Dashboard** - Overview of all features
+-  **Memory Tab** - View, add, delete stored facts and contexts
+-  **Projects Tab** - Track ideas and project details  
+-  **Music Controls** - Spotify integration
+-  **Test Zone** - Try commands and see responses
+-  **Dashboard** - Overview of all features
 
 ## Configuration
 
@@ -322,18 +302,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Groq for blazing-fast LLM inference
-- OpenAI for GPT models
-- Electron for cross-platform desktop support
-- React team for the amazing framework
-- All open-source contributors
-
 ---
 
-**Made with ❤️ by Rishi Shah**
+**Made by Rishi Shah**
