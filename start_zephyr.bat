@@ -1,6 +1,6 @@
 @echo off
 echo ===================================
-echo    🌙 Starting Zephyr System
+echo     Starting Zephyr System
 echo ===================================
 echo.
 
@@ -31,10 +31,10 @@ timeout /t 3 /nobreak >nul
 
 echo.
 echo ===================================
-echo ✅ Zephyr is now running!
+echo  Zephyr is now running!
 echo ===================================
 echo.
-echo 📋 Quick Guide:
+echo  Quick Guide:
 echo   - Press Ctrl+Alt+Z anywhere to open Zephyr
 echo   - Click "Expand" to launch full dashboard
 echo   - API Server: http://localhost:5000
