@@ -1,94 +1,339 @@
 # Zephyr
 
-Zephyr is a keyboard-activated AI assistant for Windows that provides natural language interaction with your computer. Press Ctrl+Alt+Z from anywhere to open a minimal overlay interface and interact with various system functions through conversation.
+A personal AI assistant that combines the speed of a minimal popup interface with the power of a full-featured dashboard. Designed for seamless integration into your daily workflow with voice commands, natural language processing, and intelligent memory.
 
-## Overview
+Built to be your always-accessible companion that remembers, assists, and adapts to your needs.
 
-Zephyr uses Groq's LLM API to understand natural language commands and execute actions like controlling Spotify, checking weather, reading news, and managing projects. The interface is designed to be unobtrusive, appearing only when summoned via hotkey and disappearing after completing a task.
+## Core Features
+
+### Dual Interface System
+- **Tiny Zephyr** - Instant access popup (Ctrl+Alt+Z) for quick commands and queries
+- **Dashboard** - Full React/Electron interface for advanced features and visual management
+- Seamless transition between interfaces with one-click expansion
+- System tray integration for background operation
+
+### Intelligent Interaction
+- Multi-provider LLM support (Groq, OpenAI, Gemini)
+- Natural language command understanding
+- Voice input and text-to-speech output
+- Context-aware responses with conversation memory
+- Streaming responses with real-time feedback
+
+### Smart Memory System
+- Persistent fact storage and recall
+- Learned context retention
+- User preference tracking
+- SQLite database for fast retrieval
+- Automatic context learning from conversations
+
+### Rich Integrations
+- Spotify music control (play, pause, current track)
+- Weather information via WeatherAPI
+- File search and management
+- Project idea tracking
+- Calendar event creation (Google Calendar)
+- Custom command extensibility
 
 ## Architecture
 
-The system consists of several core components:
+Zephyr uses a three-tier architecture for maximum flexibility:
 
-- `app.py` - Main entry point that registers the global hotkey and manages the UI lifecycle
-- `ui.py` - Tkinter-based overlay interface with minimal dark theme
-- `assistant.py` - Command router that processes user input and delegates to appropriate handlers
-- `groq_nlp.py` - Natural language understanding via Groq's Llama 3.1 8B model
-- `gemini_nlp.py` - Alternative NLP backend using Google Gemini (fallback option)
+### Tiny Zephyr (Frontend)
+- Minimal Tkinter interface with modern dark theme
+- Global hotkey registration (Ctrl+Alt+Z)
+- Slide-in animations and smooth transitions
+- Voice recording with wake word detection
+- Auto-hiding and smart positioning
 
-Feature modules handle specific domains:
-- `spotify.py` - Music playback control via Spotipy
-- `weather.py` - Weather information via WeatherAPI
-- `news_rss.py` - News aggregation from RSS feeds
-- `planner.py` - Calendar event management via Google Calendar API
-- `projects.py` - Local project tracking with JSON storage
-- `memory.py` - Simple fact storage and retrieval system
-- `workspace.py` - Development workspace launcher
-- `scenes.py` - Smart home scene execution
+### API Server (Bridge)
+- Flask REST API on port 5000
+- Auto-starts with Tiny Zephyr
+- Bridges communication between UI and backend
+- Handles command routing and execution
+- Provides endpoints for dashboard integration
 
-## Setup
+### Dashboard (Full Interface)
+- React 18 with Vite for fast development
+- Electron for native desktop experience
+- TailwindCSS for modern, responsive design
+- Framer Motion for smooth animations
+- Real-time data synchronization with API server
 
-Requirements:
-- Python 3.8+
-- Windows OS (uses keyboard library for global hotkey)
-- API keys for Groq and optional services (Spotify, WeatherAPI, etc.)
+```
+┌─────────────────────────────────────────────────────┐
+│                  Zephyr System                      │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  ┌──────────────┐         ┌─────────────────┐     │
+│  │ Tiny Zephyr  │◄────────┤   API Server    │     │
+│  │ (Ctrl+Alt+Z) │         │   (Port 5000)   │     │
+│  └──────────────┘         └─────────────────┘     │
+│         │                         ▲                │
+│         │ Expand                  │                │
+│         ▼                         │                │
+│  ┌──────────────────────────────────┐              │
+│  │      Zephyr Dashboard            │              │
+│  │      (React + Electron)          │──────────────┘
+│  └──────────────────────────────────┘
+│
+└─────────────────────────────────────────────────────┘
+```
 
-Installation:
-```powershell
+## Installation
+
+### Prerequisites
+- **Python 3.8+** - Core runtime
+- **Node.js 16+** - Dashboard frontend
+- **Virtual environment** - Recommended for isolation
+
+### Quick Start
+
+1. **Clone the repository:**
+```bash
 git clone https://github.com/RishiShah99/Zephyr.git
 cd Zephyr
+```
+
+2. **Set up Python environment:**
+```bash
+# Create virtual environment
 python -m venv venv
+
+# Activate (Windows)
 venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-Configuration:
-- Add your Groq API key to `api_keys.py`
-- Optionally add keys for Spotify, WeatherAPI, and other services
-- Adjust settings in `config.json` (hotkey, theme, etc.)
+3. **Set up Dashboard (optional):**
+```bash
+cd dashboard-app
+npm install
+cd ..
+```
 
-## Usage
+4. **Configure API keys:**
 
-Run the assistant:
-```powershell
+Create `api_keys.py` in the root directory:
+```python
+# Required for AI features
+GROQ_API_KEY = "your_groq_api_key"  # Get from console.groq.com
+OPENAI_API_KEY = "your_openai_key"  # Optional, for GPT models
+
+# Optional integrations
+WEATHER_API_KEY = "your_weather_key"  # From weatherapi.com
+SPOTIFY_CLIENT_ID = "your_spotify_id"
+SPOTIFY_CLIENT_SECRET = "your_spotify_secret"
+```
+
+5. **Initialize database:**
+```bash
+python -c "from memory_db import init_db; init_db()"
+```
+
+6. **Launch Zephyr:**
+```bash
+# Windows
+start_zephyr.bat
+
+# Or run directly
 python app.py
 ```
 
-Press Ctrl+Alt+Z to open the interface. Type naturally:
-- "play bohemian rhapsody"
-- "weather in london"
-- "news about technology"
-- "create project portfolio website"
-- "tell me about quantum computing"
+## Usage
 
-The interface dismisses automatically after responding. Press Escape to close manually.
+### Tiny Zephyr (Quick Access)
 
-## Background Execution
+**Launch:**
+- Press `Ctrl+Alt+Z` anywhere on your system
+- Click the system tray icon
 
-To run Zephyr on startup:
-1. The included `Zephyr.bat` script handles background execution
-2. Place it in your Windows Startup folder: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
-3. Uses `pythonw.exe` for windowless operation
+**Commands:**
+```
+"what's the weather in New York"
+"play some jazz music"
+"remember my birthday is June 15"
+"what do you remember about me"
+"create a calendar event for tomorrow at 2pm"
+"find files named report"
+```
 
-## API Integration
+**Expand to Dashboard:**
+- Click the "⛶ Expand" button in the top right
+- Tiny Zephyr auto-hides, dashboard opens
 
-Zephyr uses Groq's free tier (14,400 requests/day) for natural language understanding. The `llama-3.1-8b-instant` model provides fast inference suitable for real-time interaction.
+### Dashboard (Full Interface)
 
-Optional integrations:
-- Spotify: Requires OAuth setup via developer dashboard
-- WeatherAPI: Free tier provides current conditions
-- Google Calendar: Requires OAuth credentials
-- News: Uses public RSS feeds (no key required)
+**Access:**
+- Click "Expand" from Tiny Zephyr
+- Or run: `cd dashboard-app && npm run dev`
 
-## Technical Notes
+**Features:**
+- 🧠 **Memory Tab** - View, add, delete stored facts and contexts
+- 💡 **Projects Tab** - Track ideas and project details  
+- 🎵 **Music Controls** - Spotify integration
+- 🧪 **Test Zone** - Try commands and see responses
+- 📊 **Dashboard** - Overview of all features
 
-The NLP system uses a structured prompt that teaches the model about available intents and expected JSON response format. Commands are parsed into intent + entities, then routed to appropriate handlers. For simple pattern matching (when AI is disabled), regex-based fallback parsing is available.
+## Configuration
 
-The UI uses Tkinter with custom styling to achieve a minimal dark theme. Window positioning, auto-resize, and dynamic scrollbar behavior are handled to maintain a clean appearance.
+### Settings File
+Edit `config.json` (auto-created on first run):
+```json
+{
+  "hotkey": "ctrl+alt+z",
+  "enable_voice": false,
+  "enable_gemini": true,
+  "wake_word_enabled": false,
+  "default_city": "Toronto"
+}
+```
 
-Data is stored locally in JSON files under the `data/` directory. No cloud storage or telemetry is implemented.
+### Changing AI Provider
+In `groq_nlp.py`, modify the model selection:
+```python
+# Options: llama-3.1-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b
+MODEL = "llama-3.1-70b-versatile"
+```
 
-🔗 https://developer.spotify.com/dashboard
-→ Control your music
+### Custom Commands
+Add new intents in `assistant.py`:
+```python
+def handle_custom_command(entities):
+    # Your custom logic here
+    return "Response message"
+```
 
-**Optional:** NewsAPI, Google Calendar
+## Project Structure
+
+```
+Zephyr/
+├── app.py                  # Main entry point
+├── ui.py                   # Tiny Zephyr interface
+├── assistant.py            # Command handler
+├── groq_nlp.py            # AI/NLP processing
+├── api_server.py          # Flask REST API
+├── memory_db.py           # Database layer
+├── projects.py            # Project management
+├── weather.py             # Weather integration
+├── spotify.py             # Music control
+├── settings.py            # Configuration
+├── tray_icon.py          # System tray
+├── dashboard-app/        # React dashboard
+│   ├── src/
+│   │   ├── components/   # React components
+│   │   └── App.jsx       # Main app
+│   ├── electron/         # Electron main process
+│   └── package.json      # Dependencies
+├── data/                 # SQLite database
+└── requirements.txt      # Python dependencies
+```
+
+## API Endpoints
+
+The Flask API server provides the following endpoints:
+
+```
+GET  /health              # Health check
+POST /command             # Execute Zephyr command
+GET  /memory              # Retrieve stored memories
+POST /memory              # Add new memory
+DELETE /memory            # Remove memory
+GET  /projects            # List all projects
+POST /projects            # Create new project
+GET  /spotify/status      # Current playback
+POST /spotify/control     # Control playback
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:5000/command \
+  -H "Content-Type: application/json" \
+  -d '{"command": "what is the weather"}'
+```
+
+## Development
+
+### Running in Development Mode
+
+**Tiny Zephyr:**
+```bash
+python app.py
+```
+
+**Dashboard:**
+```bash
+cd dashboard-app
+npm run dev  # Starts Vite dev server + Electron
+```
+
+**API Server (standalone):**
+```bash
+python api_server.py
+```
+
+### Code Formatting
+```bash
+# Python (if using black)
+black *.py
+
+# JavaScript (if using prettier)  
+cd dashboard-app
+npm run format
+```
+
+### Adding New Features
+
+1. **Backend Integration:**
+   - Add function in appropriate module (e.g., `weather.py`)
+   - Register in `assistant.py` command handler
+   - Add intent to `groq_nlp.py`
+
+2. **UI Component:**
+   - Create React component in `dashboard-app/src/components/`
+   - Add route/tab in `App.jsx`
+   - Connect to API endpoint
+
+## Known Limitations
+
+- **Windows Only**: Global hotkeys require administrator privileges
+- **Single Instance**: Only one Zephyr instance can run at a time
+- **API Keys Required**: Core AI features need Groq/OpenAI API access
+- **Network Dependent**: Weather, music, and some AI features require internet
+
+## Roadmap
+
+- [ ] Multi-platform support (macOS, Linux)
+- [ ] Cloud sync for memories and projects
+- [ ] Plugin system for custom integrations
+- [ ] Mobile companion app
+- [ ] Advanced calendar integration
+- [ ] Team collaboration features
+- [ ] Offline AI model support
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Groq for blazing-fast LLM inference
+- OpenAI for GPT models
+- Electron for cross-platform desktop support
+- React team for the amazing framework
+- All open-source contributors
+
+---
+
+**Made with ❤️ by Rishi Shah**
