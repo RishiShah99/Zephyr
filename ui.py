@@ -23,13 +23,13 @@ class Overlay:
         self.root.attributes("-alpha", 0.0)  # Start invisible
         
         # Ultra-clean minimal theme (Copilot-inspired)
-        BG_DARK = "#1A1A1A"          # Pure dark background
-        BG_CARD = "#252526"          # Subtle card
-        BG_INPUT = "#2A2A2A"         # Input background (dark grey)
-        ACCENT_PRIMARY = "#0E639C"   # Calm blue accent
-        ACCENT_BORDER = "#3A3A3A"    # Subtle border
-        TEXT_PRIMARY = "#CCCCCC"     # Light grey text
-        TEXT_SECONDARY = "#666666"   # Darker grey for placeholder
+        BG_DARK = "#1A1A1A"          
+        BG_CARD = "#252526"          
+        BG_INPUT = "#2A2A2A"         
+        ACCENT_PRIMARY = "#0E639C"   
+        ACCENT_BORDER = "#3A3A3A"    
+        TEXT_PRIMARY = "#CCCCCC"     
+        TEXT_SECONDARY = "#666666"   
         
         self.root.configure(bg=BG_DARK)
         
@@ -61,7 +61,7 @@ class Overlay:
         
         title_label = tk.Label(
             header_frame,
-            text="🌙 Zephyr",  # Cool moon icon
+            text="🌙 Zephyr", 
             fg=TEXT_PRIMARY,
             bg=BG_DARK,
             font=("Segoe UI", 10, "bold")
@@ -88,7 +88,7 @@ class Overlay:
         expand_btn.bind("<Enter>", expand_on_enter)
         expand_btn.bind("<Leave>", expand_on_leave)
         
-        # Restart button - minimal style
+        # Restart button 
         restart_btn = tk.Label(
             header_frame,
             text="↻ Restart",
@@ -189,9 +189,9 @@ class Overlay:
         self.is_animating = False
         self.is_visible = False
         self.glow_animation_running = False
-        self.typing_job = None  # Track typing animation job
-        self.thinking_job = None  # Track thinking animation job
-        self.processing = False  # Track if command is being processed
+        self.typing_job = None  
+        self.thinking_job = None  
+        self.processing = False  
         
         # Protocol for window close - hide instead of quit
         self.root.protocol("WM_DELETE_WINDOW", self.hide)
@@ -359,7 +359,7 @@ class Overlay:
         self.root.deiconify()
         self.root.attributes("-alpha", 0.0)
         
-        # Simple slide in - no flashy animations
+        # Simple slide in
         self._slide_in()
     
     def _slide_in(self, step=0):
@@ -389,9 +389,9 @@ class Overlay:
             return
         
         self.is_animating = True
-        self.is_visible = False  # Mark as hidden immediately to stop any running operations
-        self.processing = False  # Cancel any processing
-        self.glow_animation_running = False  # Stop glow animation
+        self.is_visible = False  
+        self.processing = False  
+        self.glow_animation_running = False  
         
         # Cancel any pending animations
         if self.typing_job:
@@ -463,7 +463,7 @@ class Overlay:
                 
                 # Check if dashboard exists
                 if not os.path.exists(dashboard_path):
-                    print(f"❌ Dashboard app not found at: {dashboard_path}")
+                    print(f" Dashboard app not found at: {dashboard_path}")
                     return
                 
                 print(f"Dashboard path: {dashboard_path}")
@@ -474,13 +474,13 @@ class Overlay:
                     npm_version = result.stdout.decode().strip()
                     print(f"npm version: {npm_version}")
                 except Exception as npm_error:
-                    print(f"❌ npm not found: {npm_error}")
+                    print(f" npm not found: {npm_error}")
                     return
                 
                 # Check if node_modules exists
                 node_modules_path = os.path.join(dashboard_path, "node_modules")
                 if not os.path.exists(node_modules_path):
-                    print(f"⚠️ Dependencies not installed. Run: cd dashboard-app && npm install")
+                    print(f" Dependencies not installed. Run: cd dashboard-app && npm install")
                     return
                 
                 print("Launching Zephyr Dashboard...")
@@ -507,7 +507,7 @@ class Overlay:
                         stderr=subprocess.DEVNULL
                     )
                 
-                print("✅ Dashboard launched!")
+                print(" Dashboard launched!")
                 
                 # Hide tiny Zephyr after launching dashboard
                 self.root.after(0, self.hide)
@@ -515,7 +515,7 @@ class Overlay:
             except Exception as e:
                 import traceback
                 error_details = traceback.format_exc()
-                print(f"❌ Error launching dashboard: {e}\n{error_details}")
+                print(f" Error launching dashboard: {e}\n{error_details}")
         
         # Launch in background thread to not block UI
         threading.Thread(target=launch, daemon=True).start()
